@@ -233,6 +233,24 @@ export function MarginVisualizer( { clientId, attributes } ) {
 			__unstableRefreshSize={ margin }
 		>
 			<div className="block-editor__padding-visualizer" style={ style } />
+			<span
+				className="block-editor__padding-visualizer-label-top"
+				style={ { top: `-${ margin?.top }`, right: '0' } }
+			>
+				{ margin?.top }
+			</span>
+			<span
+				className="block-editor__padding-visualizer-label-bottom"
+				style={ { bottom: `-${ margin?.bottom }`, right: '0' } }
+			>
+				{ margin?.bottom }
+			</span>
+			<span className="block-editor__padding-visualizer-label-left">
+				{ margin?.left }
+			</span>
+			<span className="block-editor__padding-visualizer-label-right">
+				{ margin?.right }
+			</span>
 		</BlockPopover>
 	);
 }
