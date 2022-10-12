@@ -72,6 +72,34 @@ const config = require( '../config' );
  * @property {number=} maxListViewOpen      Max time to open list view.
  */
 
+
+class Timer {
+	constructor() {
+		this.start = process.hrtime();
+	}
+
+	humanSpan() {
+		const [ s, ns ] = process.hrtime( this.start );
+		this.start = process.hrtime();
+
+		if ( s > 3600 ) {
+			// prettier-ignore
+			return `${ Math.floor( s / 3600 ) }h ${ Math.floor( ( s % 3600 ) / 60 ) }m`;
+		}
+
+		if ( s > 60 ) {
+			return `${ Math.floor( s / 60 ) }m ${ Math.floor( s % 60 ) }`;
+		}
+
+		if ( s > 1 ) {
+			return `${ Math.floor( s + ns / 1e9 ) }s`;
+		}
+
+		return `${ Math.floor( s * 1000 + ns / 1e6 ) }ms`;
+	}
+}
+
+
 /**
  * Computes the average number from an array numbers.
  *
@@ -193,6 +221,9 @@ async function runTestSuite( testSuite, performanceTestDirectory ) {
  * @param {WPPerformanceCommandOptions} options  Command options.
  */
 async function runPerformanceTests( branches, options ) {
+	const timer = new Timer();
+	const log_t = ([before, after], t) => `${ before }${ t.humanSpan() }${ after }`;
+
 	// The default value doesn't work because commander provides an array.
 	if ( branches.length === 0 ) {
 		branches = [ 'trunk' ];
@@ -230,15 +261,19 @@ async function runPerformanceTests( branches, options ) {
 			options.testsBranch
 		);
 	}
+
+	log_t`       (took ${timer})`;
 	log( '    >> Installing dependencies and building packages' );
 	await runShellScript(
 		'npm ci && npm run build:packages',
 		performanceTestDirectory
 	);
+	log_t`       (took ${timer})`;
 	log( '    >> Creating the environment folders' );
 	await runShellScript( 'mkdir -p ' + rootDirectory + '/envs' );
 
 	// 2- Preparing the environment directories per branch.
+	log_t`       (took ${timer})`;
 	log( '\n>> Preparing an environment directory per branch' );
 	const branchDirectories = {};
 	for ( const branch of branches ) {
@@ -292,6 +327,8 @@ async function runPerformanceTests( branches, options ) {
 				'utf8'
 			);
 		}
+
+		log_t`       (branch took ${timer})`;
 	}
 
 	// 3- Printing the used folders.
@@ -332,16 +369,19 @@ async function runPerformanceTests( branches, options ) {
 					'../../tests/node_modules/.bin/wp-env start',
 					environmentDirectory
 				);
+				log_t`           (took ${timer})`;
 				log( '        >> Running the test.' );
 				rawResults[ i ][ branch ] = await runTestSuite(
 					testSuite,
 					performanceTestDirectory
 				);
+				log_t`           (took ${timer})`;
 				log( '        >> Stopping the environment' );
 				await runShellScript(
 					'../../tests/node_modules/.bin/wp-env stop',
 					environmentDirectory
 				);
+				log_t`           (took ${timer})`;
 			}
 		}
 
