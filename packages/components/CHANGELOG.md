@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### Internal
+-   `SlotFill`: updated to satisfy `react/exhaustive-deps` eslint rule ([#44403](https://github.com/WordPress/gutenberg/pull/44403))
+
 ## 21.2.0 (2022-10-05)
 
 ### Enhancements
