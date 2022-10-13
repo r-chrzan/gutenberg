@@ -263,7 +263,6 @@ export const trashPost =
 					...getNotificationArgumentsForTrashFail( { error } )
 				);
 		}
-		dispatch( { type: 'REQUEST_POST_DELETE_FINISH' } );
 	};
 
 /**
@@ -287,6 +286,26 @@ export const autosave =
 		} else {
 			await dispatch.savePost( { isAutosave: true, ...options } );
 		}
+	};
+
+export const __unstableSaveForPreview =
+	( { forceIsAutosaveable, forcePreviewLink } ) =>
+	async ( { select, dispatch } ) => {
+		if (
+			( forceIsAutosaveable || select.isEditedPostAutosaveable() ) &&
+			! select.isPostLocked()
+		) {
+			const isDraft = [ 'draft', 'auto-draft' ].includes(
+				select.getEditedPostAttribute( 'status' )
+			);
+			if ( isDraft ) {
+				await dispatch.savePost( { isPreview: true } );
+			} else {
+				await dispatch.autosave( { isPreview: true } );
+			}
+		}
+
+		return forcePreviewLink ?? select.getEditedPostPreviewLink();
 	};
 
 /**
