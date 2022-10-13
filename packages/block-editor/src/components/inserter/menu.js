@@ -26,6 +26,7 @@ import InserterPreviewPanel from './preview-panel';
 import BlockTypesTab from './block-types-tab';
 import BlockPatternsTabs from './block-patterns-tab';
 import ReusableBlocksTab from './reusable-blocks-tab';
+import { MediaTab, MediaCategoryDialog } from './media-tab';
 import InserterSearchResults from './search-results';
 import useInsertionPoint from './hooks/use-insertion-point';
 import InserterTabs from './tabs';
@@ -52,6 +53,9 @@ function InserterMenu(
 	const [ hoveredItem, setHoveredItem ] = useState( null );
 	const [ selectedPatternCategory, setSelectedPatternCategory ] =
 		useState( null );
+	const [ selectedTab, setSelectedTab ] = useState( null );
+	const [ selectedMediaCategory, setSelectedMediaCategory ] =
+		useState( null );
 
 	const [ destinationRootClientId, onInsertBlocks, onToggleInsertionPoint ] =
 		useInsertionPoint( {
@@ -61,17 +65,31 @@ function InserterMenu(
 			insertionIndex: __experimentalInsertionIndex,
 			shouldFocusBlock,
 		} );
-	const { showPatterns, hasReusableBlocks } = useSelect(
+	const { showPatterns, hasReusableBlocks, showMedia } = useSelect(
 		( select ) => {
-			const { __experimentalGetAllowedPatterns, getSettings } =
-				select( blockEditorStore );
-
+			const {
+				__experimentalGetAllowedPatterns,
+				getSettings,
+				canInsertBlockType,
+			} = select( blockEditorStore );
+			const { __experimentalReusableBlocks, __unstableFetchMedia } =
+				getSettings();
+			// TODO: we should probably prefetch data(1 result) to check if there are actually any media for each type.
+			// Except for `image` as if it's allowed we still have Openverse.
+			const _showMedia =
+				!! __unstableFetchMedia &&
+				[ 'image', 'video', 'audio' ].some( ( type ) =>
+					canInsertBlockType(
+						`core/${ type }`,
+						destinationRootClientId
+					)
+				);
 			return {
 				showPatterns: !! __experimentalGetAllowedPatterns(
 					destinationRootClientId
 				).length,
-				hasReusableBlocks:
-					!! getSettings().__experimentalReusableBlocks?.length,
+				hasReusableBlocks: !! __experimentalReusableBlocks?.length,
+				showMedia: _showMedia,
 			};
 		},
 		[ destinationRootClientId ]
@@ -167,16 +185,35 @@ function InserterMenu(
 		[ destinationRootClientId, onInsert, onHover ]
 	);
 
+	const mediaTab = useMemo(
+		() => (
+			<MediaTab
+				rootClientId={ destinationRootClientId }
+				selectedCategory={ selectedMediaCategory }
+				onSelectCategory={ setSelectedMediaCategory }
+			/>
+		),
+		[
+			destinationRootClientId,
+			onInsert,
+			selectedMediaCategory,
+			setSelectedMediaCategory,
+		]
+	);
+
 	const getCurrentTab = useCallback(
 		( tab ) => {
 			if ( tab.name === 'blocks' ) {
 				return blocksTab;
 			} else if ( tab.name === 'patterns' ) {
 				return patternsTab;
+			} else if ( tab.name === 'reusable' ) {
+				return reusableBlocksTab;
+			} else if ( tab.name === 'media' ) {
+				return mediaTab;
 			}
-			return reusableBlocksTab;
 		},
-		[ blocksTab, patternsTab, reusableBlocksTab ]
+		[ blocksTab, patternsTab, reusableBlocksTab, mediaTab ]
 	);
 
 	const searchRef = useRef();
@@ -187,7 +224,8 @@ function InserterMenu(
 	} ) );
 
 	const showAsTabs = ! filterValue && ( showPatterns || hasReusableBlocks );
-
+	const showMediaPanel =
+		selectedTab === 'media' && ! filterValue && selectedMediaCategory;
 	return (
 		<div className="block-editor-inserter__menu">
 			<div
@@ -227,7 +265,9 @@ function InserterMenu(
 					<InserterTabs
 						showPatterns={ showPatterns }
 						showReusableBlocks={ hasReusableBlocks }
+						showMedia={ showMedia }
 						prioritizePatterns={ prioritizePatterns }
+						onSelect={ setSelectedTab }
 					>
 						{ getCurrentTab }
 					</InserterTabs>
@@ -238,6 +278,13 @@ function InserterMenu(
 					</div>
 				) }
 			</div>
+			{ showMediaPanel && (
+				<MediaCategoryDialog
+					rootClientId={ destinationRootClientId }
+					onInsert={ onInsert }
+					category={ selectedMediaCategory }
+				/>
+			) }
 			{ showInserterHelpPanel && hoveredItem && (
 				<InserterPreviewPanel item={ hoveredItem } />
 			) }
