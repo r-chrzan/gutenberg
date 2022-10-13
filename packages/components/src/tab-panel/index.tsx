@@ -104,7 +104,7 @@ export function TabPanel( {
 					( tabs.length > 0 ? tabs[ 0 ].name : undefined )
 			);
 		}
-	}, [ tabs ] );
+	}, [ tabs, selected, initialTabName ] );
 
 	return (
 		<div className={ className }>
