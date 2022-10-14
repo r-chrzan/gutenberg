@@ -83,6 +83,9 @@ function Navigation( {
 	hasColorSettings = true,
 	customPlaceholder: CustomPlaceholder = null,
 } ) {
+	const isOffCanvasNavigationEditorEnabled =
+		window?.__experimentalEnableOffCanvasNavigationEditor === true;
+
 	const {
 		openSubmenusOnClick,
 		overlayMenu,
@@ -658,7 +661,12 @@ function Navigation( {
 							/* translators: %s: The name of a menu. */
 							actionLabel={ __( "Switch to '%s'" ) }
 						/>
-						<ListView blocks={ innerBlocks } isExpanded={ true } />
+						{ isOffCanvasNavigationEditorEnabled && (
+							<ListView
+								blocks={ innerBlocks }
+								isExpanded={ true }
+							/>
+						) }
 					</PanelBody>
 				</InspectorControls>
 				{ stylingInspectorControls }
@@ -832,7 +840,12 @@ function Navigation( {
 							/* translators: %s: The name of a menu. */
 							actionLabel={ __( "Switch to '%s'" ) }
 						/>
-						<ListView blocks={ innerBlocks } isExpanded={ true } />
+						{ isOffCanvasNavigationEditorEnabled && (
+							<ListView
+								blocks={ innerBlocks }
+								isExpanded={ true }
+							/>
+						) }
 					</PanelBody>
 				</InspectorControls>
 				{ stylingInspectorControls }
