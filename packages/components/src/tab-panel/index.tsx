@@ -128,8 +128,10 @@ export function TabPanel( {
 						selected={ tab.name === selected }
 						key={ tab.name }
 						onClick={ () => handleClick( tab.name ) }
+						aria-label={ tab.icon && tab.title }
+						icon={ tab.icon }
 					>
-						{ tab.title }
+						{ ! tab.icon && tab.title }
 					</TabButton>
 				) ) }
 			</NavigableMenu>

@@ -5,7 +5,7 @@ import {
 	BlockInspector,
 	store as blockEditorStore,
 } from '@wordpress/block-editor';
-import { cog } from '@wordpress/icons';
+import { drawerRight } from '@wordpress/icons';
 import { Platform } from '@wordpress/element';
 import { store as keyboardShortcutsStore } from '@wordpress/keyboard-shortcuts';
 import { store as interfaceStore } from '@wordpress/interface';
@@ -78,7 +78,7 @@ const SettingsSidebar = () => {
 			/* translators: button label text should, if possible, be under 16 characters. */
 			title={ __( 'Settings' ) }
 			toggleShortcut={ keyboardShortcut }
-			icon={ cog }
+			icon={ drawerRight }
 			isActiveByDefault={ SIDEBAR_ACTIVE_BY_DEFAULT }
 		>
 			{ ! isTemplateMode && sidebarName === 'edit-post/document' && (

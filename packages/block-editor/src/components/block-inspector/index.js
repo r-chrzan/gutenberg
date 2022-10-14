@@ -15,9 +15,11 @@ import {
 	__experimentalHStack as HStack,
 	__experimentalVStack as VStack,
 	Button,
+	TabPanel,
 } from '@wordpress/components';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { useMemo, useCallback } from '@wordpress/element';
+import { cog, listView, styles } from '@wordpress/icons';
 
 /**
  * Internal dependencies
@@ -36,8 +38,31 @@ import useBlockDisplayInformation from '../use-block-display-information';
 import { store as blockEditorStore } from '../../store';
 import BlockIcon from '../block-icon';
 
+const TAB_MENU = {
+	name: 'menu',
+	title: 'Menu',
+	value: 'menu',
+	icon: listView,
+};
+
+const TAB_SETTINGS = {
+	name: 'settings',
+	title: 'Settings',
+	value: 'settings',
+	icon: cog,
+};
+
+const TAB_APPEARANCE = {
+	name: 'appearance',
+	title: 'Appearance',
+	value: 'appearance',
+	icon: styles,
+};
+
+const TABS_SETTINGS = [ TAB_MENU, TAB_SETTINGS, TAB_APPEARANCE ];
+
 function useContentBlocks( blockTypes, block ) {
-	const contenBlocksObjectAux = useMemo( () => {
+	const contentBlocksObjectAux = useMemo( () => {
 		return blockTypes.reduce( ( result, blockType ) => {
 			if (
 				blockType.name !== 'core/list-item' &&
@@ -53,7 +78,7 @@ function useContentBlocks( blockTypes, block ) {
 	}, [ blockTypes ] );
 	const isContentBlock = useCallback(
 		( blockName ) => {
-			return !! contenBlocksObjectAux[ blockName ];
+			return !! contentBlocksObjectAux[ blockName ];
 		},
 		[ blockTypes ]
 	);
@@ -238,43 +263,79 @@ const BlockInspectorSingleBlock = ( { clientId, blockName } ) => {
 		[ blockName ]
 	);
 	const blockInformation = useBlockDisplayInformation( clientId );
+
 	return (
 		<div className="block-editor-block-inspector">
 			<BlockCard { ...blockInformation } />
 			<BlockVariationTransforms blockClientId={ clientId } />
-			{ hasBlockStyles && (
-				<div>
-					<PanelBody title={ __( 'Styles' ) }>
-						<BlockStyles clientId={ clientId } />
-						{ hasBlockSupport(
-							blockName,
-							'defaultStylePicker',
-							true
-						) && <DefaultStylePicker blockName={ blockName } /> }
-					</PanelBody>
-				</div>
-			) }
-			<InspectorControls.Slot />
-			<InspectorControls.Slot
-				__experimentalGroup="color"
-				label={ __( 'Color' ) }
-				className="color-block-support-panel__inner-wrapper"
-			/>
-			<InspectorControls.Slot
-				__experimentalGroup="typography"
-				label={ __( 'Typography' ) }
-			/>
-			<InspectorControls.Slot
-				__experimentalGroup="dimensions"
-				label={ __( 'Dimensions' ) }
-			/>
-			<InspectorControls.Slot
-				__experimentalGroup="border"
-				label={ __( 'Border' ) }
-			/>
-			<div>
-				<AdvancedControls />
-			</div>
+			<TabPanel
+				className="block-editor-block-inspector__tabs"
+				tabs={ TABS_SETTINGS }
+				// TODO: Will we be omitting any tabs so the first always has
+				// something useful or will we need to set the initial tab?
+				// initialTabName={}
+			>
+				{ ( tab ) => {
+					if ( tab.name === TAB_MENU.name ) {
+						return (
+							<InspectorControls.Slot __experimentalGroup="menu" />
+						);
+					}
+
+					if ( tab.name === TAB_SETTINGS.name ) {
+						return (
+							<>
+								<InspectorControls.Slot />
+								<div>
+									<AdvancedControls />
+								</div>
+							</>
+						);
+					}
+
+					if ( tab.name === TAB_APPEARANCE.name ) {
+						return (
+							<>
+								{ hasBlockStyles && (
+									<div>
+										<PanelBody title={ __( 'Styles' ) }>
+											<BlockStyles
+												clientId={ clientId }
+											/>
+											{ hasBlockSupport(
+												blockName,
+												'defaultStylePicker',
+												true
+											) && (
+												<DefaultStylePicker
+													blockName={ blockName }
+												/>
+											) }
+										</PanelBody>
+									</div>
+								) }
+								<InspectorControls.Slot
+									__experimentalGroup="color"
+									label={ __( 'Color' ) }
+									className="color-block-support-panel__inner-wrapper"
+								/>
+								<InspectorControls.Slot
+									__experimentalGroup="typography"
+									label={ __( 'Typography' ) }
+								/>
+								<InspectorControls.Slot
+									__experimentalGroup="dimensions"
+									label={ __( 'Dimensions' ) }
+								/>
+								<InspectorControls.Slot
+									__experimentalGroup="border"
+									label={ __( 'Border' ) }
+								/>
+							</>
+						);
+					}
+				} }
+			</TabPanel>
 			<SkipToSelectedBlock key="back" />
 		</div>
 	);
