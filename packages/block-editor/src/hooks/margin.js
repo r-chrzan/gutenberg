@@ -198,14 +198,14 @@ export function MarginVisualizer( { clientId, attributes } ) {
 			: 0;
 
 		return {
-			borderTopWidth: marginTop,
-			borderRightWidth: marginRight,
-			borderBottomWidth: marginBottom,
-			borderLeftWidth: marginLeft,
-			top: marginTop !== 0 ? `calc(${ marginTop } * -1)` : 0,
-			right: marginRight !== 0 ? `calc(${ marginRight } * -1)` : 0,
-			bottom: marginBottom !== 0 ? `calc(${ marginBottom } * -1)` : 0,
-			left: marginLeft !== 0 ? `calc(${ marginLeft } * -1)` : 0,
+			borderTopWidth: marginTop || 0,
+			borderRightWidth: marginRight || 0,
+			borderBottomWidth: marginBottom || 0,
+			borderLeftWidth: marginLeft || 0,
+			top: marginTop ? `calc(${ marginTop } * -1)` : 0,
+			right: marginRight ? `calc(${ marginRight } * -1)` : 0,
+			bottom: marginBottom ? `calc(${ marginBottom } * -1)` : 0,
+			left: marginLeft ? `calc(${ marginLeft } * -1)` : 0,
 			backgroundImage: `linear-gradient(135deg, ${ stripesColor } 7.14%, transparent 7.14%, transparent 50%, ${ stripesColor } 50%, ${ stripesColor } 57.14%, transparent 57.14%, transparent 100%)`,
 			...stripes,
 		};
