@@ -13,6 +13,7 @@
 ### Internal
 
 -   `Modal`: Convert to TypeScript ([#42949](https://github.com/WordPress/gutenberg/pull/42949)).
+-   `withFilters`: Refactor away from `_.without()` ([#44980](https://github.com/WordPress/gutenberg/pull/44980/)).
 
 ## 21.2.0 (2022-10-05)
 
