@@ -46,6 +46,7 @@ import {
 	ResetButton,
 } from './styles';
 import { Spacer } from '../spacer';
+import { FontSizeOption } from './types';
 
 // This conditional is needed to maintain the spacing before the slider in the `withSlider` case.
 const MaybeVStack = ( {
@@ -230,7 +231,11 @@ const UnforwardedFontSizePicker = (
 									onChange?.(
 										hasUnits
 											? selectedItem.size
-											: Number( selectedItem.size )
+											: Number( selectedItem.size ),
+										getSelectedOption(
+											fontSizes,
+											selectedItem.size
+										)
 									);
 									if (
 										selectedItem.key === CUSTOM_FONT_SIZE
@@ -249,7 +254,8 @@ const UnforwardedFontSizePicker = (
 							value={ value }
 							onChange={ ( newValue ) => {
 								onChange?.(
-									hasUnits ? newValue : Number( newValue )
+									hasUnits ? newValue : Number( newValue ),
+									getSelectedOption( fontSizes, newValue )
 								);
 							} }
 							isBlock
