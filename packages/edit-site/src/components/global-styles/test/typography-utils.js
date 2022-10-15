@@ -204,6 +204,77 @@ describe( 'typography utils', () => {
 					expected:
 						'clamp(21px, 1.3125rem + ((1vw - 7.68px) * 7.091), 80px)',
 				},
+
+				// Should adjust computed min in px to min limit.
+				{
+					preset: {
+						size: '14px',
+					},
+					typographySettings: {
+						fluid: true,
+					},
+					expected:
+						'clamp(14px, 0.875rem + ((1vw - 7.68px) * 0.841), 21px)',
+				},
+
+				// Should adjust computed min in rem to min limit.
+				{
+					preset: {
+						size: '1.1rem',
+					},
+					typographySettings: {
+						fluid: true,
+					},
+					// @TODO round all values to 3 decimal places.
+					expected:
+						'clamp(0.875rem, 0.875rem + ((1vw - 0.48rem) * 1.49), 1.65rem)',
+				},
+
+				// Should adjust fluid min value in px to min limit.
+				{
+					preset: {
+						size: '20px',
+						fluid: {
+							min: '12px',
+						},
+					},
+					typographySettings: {
+						fluid: true,
+					},
+					expected:
+						'clamp(14px, 0.875rem + ((1vw - 7.68px) * 1.923), 30px)',
+				},
+
+				// Should adjust fluid min value in rem to min limit.
+				{
+					preset: {
+						size: '1.5rem',
+						fluid: {
+							min: '0.5rem',
+						},
+					},
+					typographySettings: {
+						fluid: true,
+					},
+					expected:
+						'clamp(0.875rem, 0.875rem + ((1vw - 0.48rem) * 2.644), 2.25rem)',
+				},
+
+				// Should adjust fluid min value but honor max value.
+				{
+					preset: {
+						size: '1.5rem',
+						fluid: {
+							min: '0.5rem',
+							max: '5rem',
+						},
+					},
+					typographySettings: {
+						fluid: true,
+					},
+					expected:
+						'clamp(0.875rem, 0.875rem + ((1vw - 0.48rem) * 7.933), 5rem)',
+				},
 			].forEach( ( { preset, typographySettings, expected } ) => {
 				expect(
 					getTypographyFontSizeValue( preset, typographySettings )

@@ -10,6 +10,7 @@ const DEFAULT_MINIMUM_VIEWPORT_WIDTH = '768px';
 const DEFAULT_SCALE_FACTOR = 1;
 const DEFAULT_MINIMUM_FONT_SIZE_FACTOR = 0.75;
 const DEFAULT_MAXIMUM_FONT_SIZE_FACTOR = 1.5;
+const DEFAULT_MINIMUM_FONT_SIZE_LIMIT = '14px';
 
 /**
  * Computes a fluid font-size value that uses clamp(). A minimum and maxinmum
@@ -53,11 +54,12 @@ export function getComputedFluidTypographyValue( {
 	scaleFactor = DEFAULT_SCALE_FACTOR,
 	minimumFontSizeFactor = DEFAULT_MINIMUM_FONT_SIZE_FACTOR,
 	maximumFontSizeFactor = DEFAULT_MAXIMUM_FONT_SIZE_FACTOR,
+	minimumFontSizeLimit = DEFAULT_MINIMUM_FONT_SIZE_LIMIT,
 } ) {
 	// Calculate missing minimumFontSize and maximumFontSize from
 	// defaultFontSize if provided.
 	if ( fontSize && ( ! minimumFontSize || ! maximumFontSize ) ) {
-		// Parse default font size.
+		// Parses default font size.
 		const fontSizeParsed = getTypographyValueAndUnit( fontSize );
 
 		// Protect against invalid units.
@@ -70,6 +72,39 @@ export function getComputedFluidTypographyValue( {
 			minimumFontSize =
 				fontSizeParsed.value * minimumFontSizeFactor +
 				fontSizeParsed.unit;
+		}
+
+		// Parses the minimum font size limit, so we can perform checks using it.
+		const minimumFontSizeLimitParsed = getTypographyValueAndUnit(
+			minimumFontSizeLimit,
+			{
+				coerceTo: fontSizeParsed.unit,
+			}
+		);
+
+		/*
+		 * Checks if a user-defined font size is lower than $minimum_font_size_limit. If so than it should become the minimum font size.
+		 * Otherwise, if the minimum font size is lower than $minimum_font_size_limit
+		 * use $minimum_font_size_limit instead.
+		 */
+		if ( !! minimumFontSizeLimitParsed?.value ) {
+			if ( fontSizeParsed.value < minimumFontSizeLimitParsed.value ) {
+				minimumFontSize = `${ fontSizeParsed.value }${ fontSizeParsed.unit }`;
+			} else {
+				const minimumFontSizeParsed = getTypographyValueAndUnit(
+					minimumFontSize,
+					{
+						coerceTo: fontSizeParsed.unit,
+					}
+				);
+				if (
+					!! minimumFontSizeParsed?.value &&
+					minimumFontSizeParsed.value <
+						minimumFontSizeLimitParsed.value
+				) {
+					minimumFontSize = `${ minimumFontSizeLimitParsed.value }${ minimumFontSizeLimitParsed.unit }`;
+				}
+			}
 		}
 
 		// If no maximumFontSize is provided, derive using max scale factor.
